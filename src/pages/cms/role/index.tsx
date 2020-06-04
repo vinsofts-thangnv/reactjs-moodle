@@ -3,64 +3,65 @@ import { Container, Table, Button } from 'react-bootstrap';
 import { Link, useRouteMatch } from "react-router-dom";
 import { moodleClient } from '../../../services/MoodleClient';
 
-export default () => {
+export default (props: any) => {
 
-    const [courses, setCourses]: any = useState([]);
+    const [roles, setRoles]: any = useState([]);
 
     const { url } = useRouteMatch();
 
     useEffect(() => {
         moodleClient.then((client: any) => {
             client.call({
-                wsfunction: "core_course_get_courses"
+                wsfunction: "roleservice_get_all_roles"
             }).then((res: any) => {
-                setCourses(res);
+                setRoles(res);
             })
         });
     }, []);
 
-    const deleteCourse = (id: any) => {
+    const deleteRole = (id: any) => {
         moodleClient.then((client: any) => {
             client.call({
-                wsfunction: "core_course_delete_courses",
+                wsfunction: "roleservice_delete_role",
                 args: {
-                    courseids: [id]
+                    roleid: id
                 }
             }).then((res: any) => {
-                if (res.warnings.length) {
+                if (!res.deleted) {
                     alert('Đang chờ xử lý')
                 } else {
-                    let coursesTemp = [...courses];
-                    coursesTemp = coursesTemp.filter(x => x.id !== id);
-                    setCourses(coursesTemp);
+                    let rolesTemp = [...roles];
+                    rolesTemp = rolesTemp.filter(x => x.id !== id);
+                    setRoles(rolesTemp);
                 }
             })
         });
     }
-
     return (
         <Container>
-            <h2>Courses</h2>
+            <h2>Roles</h2>
             <Table striped bordered hover>
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Name</th>
+                        <th>Short Name</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {
-                        courses.map((course: any) => {
+                        roles.map((role: any) => {
                             return (
-                                <tr key={course.id}>
-                                    <td>{course.id}</td>
-                                    <td>{course.displayname}</td>
+                                <tr key={role.id}>
+                                    <td>{role.id}</td>
+                                    <td>{role.name}</td>
+                                    <td>{role.shortname}</td>
                                     <td>
-                                        <Button size="sm" variant="danger" onClick={() => deleteCourse(course.id)}>
+                                        <Button size="sm" variant="danger" onClick={() => deleteRole(role.id)}>
                                             Delete
                                         </Button>
-                                        <Link to={`${url}/${course.id}/edit`}>
+                                        <Link to={`${url}/${role.id}/edit`}>
                                             Edit
                                         </Link>
                                     </td>

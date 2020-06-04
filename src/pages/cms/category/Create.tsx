@@ -6,9 +6,8 @@ import { moodleClient } from '../../../services/MoodleClient';
 export default () => {
 
     const [categories, setCategories] = useState([]);
-    const [fullname, setFullname] = useState('');
-    const [shortname, setShortname] = useState('');
-    const [categoryid, setCategoryid] = useState();
+    const [name, setName] = useState('');
+    const [parent, setParent] = useState();
     const [addSuccess, setAddSuccess] = useState(false);
 
     useEffect(() => {
@@ -25,13 +24,12 @@ export default () => {
         e.preventDefault();
         moodleClient.then((client: any) => {
             client.call({
-                wsfunction: "core_course_create_courses",
+                wsfunction: "core_course_create_categories",
                 args: {
-                    courses: [
+                    categories: [
                         {
-                            fullname: fullname,
-                            shortname: shortname,
-                            categoryid: categoryid
+                            name: name,
+                            parent: parent
                         }
                     ]
                 }
@@ -46,30 +44,24 @@ export default () => {
     }
 
     if (addSuccess) {
-        return (<Redirect to='/cms/course' />)
+        return (<Redirect to='/cms/category' />)
     }
 
     return (
         <Container>
-            <h2>Course</h2>
+            <h2>Category</h2>
             <Form>
                 <Row>
                     <Col>
                         <Form.Group controlId="">
                             <Form.Label>Name</Form.Label>
-                            <Form.Control type="text" placeholder="" value={fullname} onChange={(e: any) => setFullname(e.target.value)} />
+                            <Form.Control type="text" placeholder="" value={name} onChange={(e: any) => setName(e.target.value)} />
                         </Form.Group>
                     </Col>
                     <Col>
                         <Form.Group controlId="">
-                            <Form.Label>Short Name</Form.Label>
-                            <Form.Control type="text" placeholder="" value={shortname} onChange={(e: any) => setShortname(e.target.value)} />
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="">
-                            <Form.Label>Category</Form.Label>
-                            <Form.Control as="select" custom value={categoryid} onChange={(e: any) => setCategoryid(e.target.value)}>
+                            <Form.Label>Parent</Form.Label>
+                            <Form.Control as="select" custom value={parent} onChange={(e: any) => setParent(e.target.value)}>
                                 {
                                     categories.map((category: any) => {
                                         return (<option key={category.id} value={category.id}>{category.name}</option>);

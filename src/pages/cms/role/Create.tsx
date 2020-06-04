@@ -5,18 +5,18 @@ import { moodleClient } from '../../../services/MoodleClient';
 
 export default () => {
 
-    const [categories, setCategories] = useState([]);
-    const [fullname, setFullname] = useState('');
+    const [roles, setRoles]: any = useState([]);
+    const [name, setName] = useState('');
     const [shortname, setShortname] = useState('');
-    const [categoryid, setCategoryid] = useState();
+    const [archetype, setArchetype] = useState();
     const [addSuccess, setAddSuccess] = useState(false);
 
     useEffect(() => {
         moodleClient.then((client: any) => {
             client.call({
-                wsfunction: "core_course_get_categories"
+                wsfunction: "roleservice_get_all_roles"
             }).then((res: any) => {
-                setCategories(res);
+                setRoles(res);
             })
         });
     }, []);
@@ -25,15 +25,11 @@ export default () => {
         e.preventDefault();
         moodleClient.then((client: any) => {
             client.call({
-                wsfunction: "core_course_create_courses",
+                wsfunction: "roleservice_create_role",
                 args: {
-                    courses: [
-                        {
-                            fullname: fullname,
-                            shortname: shortname,
-                            categoryid: categoryid
-                        }
-                    ]
+                    name: name,
+                    shortname: shortname,
+                    archetype: archetype
                 }
             }).then((res: any) => {
                 if (res.errorcode) {
@@ -46,18 +42,18 @@ export default () => {
     }
 
     if (addSuccess) {
-        return (<Redirect to='/cms/course' />)
+        return (<Redirect to='/cms/role' />)
     }
 
     return (
         <Container>
-            <h2>Course</h2>
+            <h2>Role</h2>
             <Form>
                 <Row>
                     <Col>
                         <Form.Group controlId="">
                             <Form.Label>Name</Form.Label>
-                            <Form.Control type="text" placeholder="" value={fullname} onChange={(e: any) => setFullname(e.target.value)} />
+                            <Form.Control type="text" placeholder="" value={name} onChange={(e: any) => setName(e.target.value)} />
                         </Form.Group>
                     </Col>
                     <Col>
@@ -68,11 +64,11 @@ export default () => {
                     </Col>
                     <Col>
                         <Form.Group controlId="">
-                            <Form.Label>Category</Form.Label>
-                            <Form.Control as="select" custom value={categoryid} onChange={(e: any) => setCategoryid(e.target.value)}>
+                            <Form.Label>Archetype</Form.Label>
+                            <Form.Control as="select" custom value={archetype} onChange={(e: any) => setArchetype(e.target.value)}>
                                 {
-                                    categories.map((category: any) => {
-                                        return (<option key={category.id} value={category.id}>{category.name}</option>);
+                                    roles.map((role: any) => {
+                                        return (<option key={role.id} value={role.shortname}>{role.name || role.shortname}</option>);
                                     })
                                 }
                             </Form.Control>

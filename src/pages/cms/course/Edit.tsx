@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Col, Container, Form, Row } from 'react-bootstrap';
-import { Redirect } from "react-router-dom";
+import { Redirect, useRouteMatch } from "react-router-dom";
 import { moodleClient } from '../../../services/MoodleClient';
 
 export default () => {
@@ -9,7 +9,27 @@ export default () => {
     const [fullname, setFullname] = useState('');
     const [shortname, setShortname] = useState('');
     const [categoryid, setCategoryid] = useState();
-    const [addSuccess, setAddSuccess] = useState(false);
+    const [updateSuccess, setUpdateSuccess] = useState(false);
+
+    const { params } = useRouteMatch() as any;
+
+    useEffect(() => {
+        moodleClient.then((client: any) => {
+            client.call({
+                wsfunction: "core_course_get_courses",
+                args: {
+                    options: {
+                        ids: [params.id]
+                    }
+                }
+            }).then((res: any) => {
+                const course = res[0];
+                setFullname(course.fullname)
+                setShortname(course.shortname)
+                setCategoryid(course.categoryid)
+            })
+        });
+    }, []);
 
     useEffect(() => {
         moodleClient.then((client: any) => {
@@ -25,10 +45,11 @@ export default () => {
         e.preventDefault();
         moodleClient.then((client: any) => {
             client.call({
-                wsfunction: "core_course_create_courses",
+                wsfunction: "core_course_update_courses",
                 args: {
                     courses: [
                         {
+                            id: params?.id,
                             fullname: fullname,
                             shortname: shortname,
                             categoryid: categoryid
@@ -39,13 +60,13 @@ export default () => {
                 if (res.errorcode) {
                     alert(res.message)
                 } else {
-                    setAddSuccess(true)
+                    setUpdateSuccess(true)
                 }
             })
         });
     }
 
-    if (addSuccess) {
+    if (updateSuccess) {
         return (<Redirect to='/cms/course' />)
     }
 

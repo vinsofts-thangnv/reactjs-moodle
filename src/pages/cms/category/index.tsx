@@ -3,44 +3,43 @@ import { Container, Table, Button } from 'react-bootstrap';
 import { Link, useRouteMatch } from "react-router-dom";
 import { moodleClient } from '../../../services/MoodleClient';
 
-export default () => {
+export default (props: any) => {
 
-    const [courses, setCourses]: any = useState([]);
+    const [categories, setCategories]: any = useState([]);
 
     const { url } = useRouteMatch();
 
     useEffect(() => {
         moodleClient.then((client: any) => {
             client.call({
-                wsfunction: "core_course_get_courses"
+                wsfunction: "core_course_get_categories"
             }).then((res: any) => {
-                setCourses(res);
+                setCategories(res);
             })
         });
     }, []);
 
-    const deleteCourse = (id: any) => {
+    const deleteCategory = (id: any) => {
         moodleClient.then((client: any) => {
             client.call({
-                wsfunction: "core_course_delete_courses",
+                wsfunction: "core_course_delete_categories",
                 args: {
-                    courseids: [id]
+                    categoryids: [id]
                 }
             }).then((res: any) => {
                 if (res.warnings.length) {
                     alert('Đang chờ xử lý')
                 } else {
-                    let coursesTemp = [...courses];
-                    coursesTemp = coursesTemp.filter(x => x.id !== id);
-                    setCourses(coursesTemp);
+                    let categoriesTemp = [...categories];
+                    categoriesTemp = categoriesTemp.filter(x => x.id !== id);
+                    setCategories(categoriesTemp);
                 }
             })
         });
     }
-
     return (
         <Container>
-            <h2>Courses</h2>
+            <h2>Categories</h2>
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -51,16 +50,16 @@ export default () => {
                 </thead>
                 <tbody>
                     {
-                        courses.map((course: any) => {
+                        categories.map((category: any) => {
                             return (
-                                <tr key={course.id}>
-                                    <td>{course.id}</td>
-                                    <td>{course.displayname}</td>
+                                <tr key={category.id}>
+                                    <td>{category.id}</td>
+                                    <td>{category.name}</td>
                                     <td>
-                                        <Button size="sm" variant="danger" onClick={() => deleteCourse(course.id)}>
+                                        <Button size="sm" variant="danger" onClick={() => deleteCategory(category.id)}>
                                             Delete
                                         </Button>
-                                        <Link to={`${url}/${course.id}/edit`}>
+                                        <Link to={`${url}/${category.id}/edit`}>
                                             Edit
                                         </Link>
                                     </td>
